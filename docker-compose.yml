@@ -12,6 +12,10 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN}
       SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: "8080"
+      # Optional: public API URL for Swagger (default "/" = same host as Swagger UI)
+      OPENAPI_SERVER_URL: ${OPENAPI_SERVER_URL:-/}
+      # Optional: comma-separated frontend origins, or "*" for any
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
       # Optional tuning
       GITHUB_MAX_CONCURRENT_REQUESTS: ${GITHUB_MAX_CONCURRENT_REQUESTS:-15}
       JAVA_OPTS: ${JAVA_OPTS:--XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
