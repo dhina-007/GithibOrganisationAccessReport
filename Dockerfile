@@ -1,14 +1,14 @@
-# Multi-stage build for GitHub Access Report API
+# Multi-stage build — uses Maven image (no mvnw/.mvn required on the host)
 # Stage 1: build the Spring Boot jar
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
 WORKDIR /workspace
 
-COPY pom.xml mvnw ./
-COPY .mvn .mvn
-COPY src src
+# Cache dependencies first for faster rebuilds
+COPY pom.xml .
+RUN mvn -q -B dependency:go-offline
 
-RUN chmod +x mvnw \
-    && ./mvnw -q -DskipTests package \
+COPY src ./src
+RUN mvn -q -B -DskipTests package \
     && cp target/*.jar /workspace/app.jar
 
 # Stage 2: slim runtime image
@@ -25,7 +25,6 @@ COPY --from=build /workspace/app.jar /app/app.jar
 
 EXPOSE 8080
 
-# Actuator health used by orchestrators / docker compose
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '"status":"UP"' || exit 1
 
