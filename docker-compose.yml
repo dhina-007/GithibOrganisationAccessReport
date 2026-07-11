@@ -1,0 +1,24 @@
+services:
+  github-access-report:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: github-access-report:1.0.0
+    container_name: github-access-report
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      # Required: GitHub Personal Access Token (never commit real values)
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: "8080"
+      # Optional tuning
+      GITHUB_MAX_CONCURRENT_REQUESTS: ${GITHUB_MAX_CONCURRENT_REQUESTS:-15}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
